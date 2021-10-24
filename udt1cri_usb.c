@@ -28,6 +28,7 @@
 #include <linux/signal.h>
 #include <linux/slab.h>
 #include <linux/usb.h>
+#include <linux/version.h>
 
 /* vendor and product id */
 #define UDT1CRI_MODULE_NAME "udt1cri_usb"
@@ -251,7 +252,11 @@ static void udt1cri_usb_write_bulk_callback(struct urb *urb)
 		netdev->stats.tx_bytes += ctx->dlc;
 
 		can_led_event(netdev, CAN_LED_EVENT_TX);
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(5,12,0)
 		can_get_echo_skb(netdev, ctx->ndx);
+#else
+		can_get_echo_skb(netdev, ctx->ndx, NULL);
+#endif
 	}
 
 	if (urb->status)
@@ -339,7 +344,11 @@ static netdev_tx_t udt1cri_usb_start_xmit(struct sk_buff *skb,
 	if (!ctx)
 		return NETDEV_TX_BUSY;
 
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(5,12,0)
 	can_put_echo_skb(skb, priv->netdev, ctx->ndx);
+#else
+	can_put_echo_skb(skb, priv->netdev, ctx->ndx, 0);
+#endif
 
 	usb_msg.cmd_id = UDT1CRI_CMD_TRANSMIT_MESSAGE_EV;
 
@@ -362,7 +371,11 @@ static netdev_tx_t udt1cri_usb_start_xmit(struct sk_buff *skb,
 	return NETDEV_TX_OK;
 
 xmit_failed:
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(5,12,0)
 	can_free_echo_skb(priv->netdev, ctx->ndx);
+#else
+	can_free_echo_skb(priv->netdev, ctx->ndx, NULL);
+#endif
 	udt1cri_usb_free_ctx(ctx);
 	dev_kfree_skb(skb);
 	stats->tx_dropped++;

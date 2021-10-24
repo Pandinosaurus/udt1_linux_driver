@@ -1,15 +1,21 @@
 # Linux kernel driver for UniSwarm UDT1CR CAN Debugger Tool 
 
 ## Usage
-### Building and installing
+### Automatic installation dkms and rules udev:
 
-Download the Repository to your local machine:
+Clone repository on your local machine:
 
 ```bash
+sudo apt install dkms can-utils
 git clone https://github.com/UniSwarm/udt1_linux_driver.git
-```
-```bash
 cd udt1_linux_driver
+sudo make run_auto
+```
+
+Plug your UDT on USB port, can0 appear.
+
+```bash
+candump can0
 ```
 
 #### DKMS method:
@@ -34,11 +40,6 @@ if UEFI Secure Boot is actived follow instruction:
 
 ```bash
 sudo make udev_install
-```
-
-### Automatic installation dkms and rules udev:
-```
-sudo make run_auto
 ```
 
 ### To remove all installed files: 

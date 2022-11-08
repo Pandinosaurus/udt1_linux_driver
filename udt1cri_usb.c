@@ -166,12 +166,12 @@ static const struct usb_device_id udt1cri_usb_table[] = {
 MODULE_DEVICE_TABLE(usb, udt1cri_usb_table);
 
 static const u16 udt1cri_termination[] = { UDT1CRI_TERMINATION_DISABLED,
-					UDT1CRI_TERMINATION_ENABLED };
+					   UDT1CRI_TERMINATION_ENABLED };
 
 static const u32 udt1cri_bitrate[] = { 20000,  33333,  50000,  80000,  83333,
-				    100000, 125000, 150000, 175000, 200000,
-				    225000, 250000, 275000, 300000, 500000,
-				    625000, 800000, 1000000 };
+				       100000, 125000, 150000, 175000, 200000,
+				       225000, 250000, 275000, 300000, 500000,
+				       625000, 800000, 1000000 };
 
 static inline void udt1cri_init_ctx(struct udt1cri_priv *priv)
 {
@@ -185,8 +185,8 @@ static inline void udt1cri_init_ctx(struct udt1cri_priv *priv)
 	atomic_set(&priv->free_ctx_cnt, ARRAY_SIZE(priv->tx_context));
 }
 
-static inline struct udt1cri_usb_ctx *udt1cri_usb_get_free_ctx(struct udt1cri_priv *priv,
-							 struct can_frame *cf)
+static inline struct udt1cri_usb_ctx *
+udt1cri_usb_get_free_ctx(struct udt1cri_priv *priv, struct can_frame *cf)
 {
 	int i = 0;
 	struct udt1cri_usb_ctx *ctx = NULL;
@@ -250,7 +250,7 @@ static void udt1cri_usb_write_bulk_callback(struct urb *urb)
 		netdev->stats.tx_packets++;
 		netdev->stats.tx_bytes += ctx->dlc;
 
-#if LINUX_VERSION_CODE <= KERNEL_VERSION(5,12,0)
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(5, 12, 0)
 		can_get_echo_skb(netdev, ctx->ndx);
 #else
 		can_get_echo_skb(netdev, ctx->ndx, NULL);
@@ -266,8 +266,8 @@ static void udt1cri_usb_write_bulk_callback(struct urb *urb)
 
 /* Send data to device */
 static netdev_tx_t udt1cri_usb_xmit(struct udt1cri_priv *priv,
-				 struct udt1cri_usb_msg *usb_msg,
-				 struct udt1cri_usb_ctx *ctx)
+				    struct udt1cri_usb_msg *usb_msg,
+				    struct udt1cri_usb_ctx *ctx)
 {
 	struct urb *urb;
 	u8 *buf;
@@ -278,8 +278,8 @@ static netdev_tx_t udt1cri_usb_xmit(struct udt1cri_priv *priv,
 	if (!urb)
 		return -ENOMEM;
 
-	buf = usb_alloc_coherent(priv->udev, UDT1CRI_USB_TX_BUFF_SIZE, GFP_ATOMIC,
-				 &urb->transfer_dma);
+	buf = usb_alloc_coherent(priv->udev, UDT1CRI_USB_TX_BUFF_SIZE,
+				 GFP_ATOMIC, &urb->transfer_dma);
 	if (!buf) {
 		err = -ENOMEM;
 		goto nomembuf;
@@ -289,8 +289,8 @@ static netdev_tx_t udt1cri_usb_xmit(struct udt1cri_priv *priv,
 
 	usb_fill_bulk_urb(urb, priv->udev,
 			  usb_sndbulkpipe(priv->udev, UDT1CRI_USB_EP_OUT), buf,
-			  UDT1CRI_USB_TX_BUFF_SIZE, udt1cri_usb_write_bulk_callback,
-			  ctx);
+			  UDT1CRI_USB_TX_BUFF_SIZE,
+			  udt1cri_usb_write_bulk_callback, ctx);
 
 	urb->transfer_flags |= URB_NO_TRANSFER_DMA_MAP;
 	usb_anchor_urb(urb, &priv->tx_submitted);
@@ -324,7 +324,7 @@ nomembuf:
 
 /* Send data to device */
 static netdev_tx_t udt1cri_usb_start_xmit(struct sk_buff *skb,
-				       struct net_device *netdev)
+					  struct net_device *netdev)
 {
 	struct udt1cri_priv *priv = netdev_priv(netdev);
 	struct can_frame *cf = (struct can_frame *)skb->data;
@@ -342,7 +342,7 @@ static netdev_tx_t udt1cri_usb_start_xmit(struct sk_buff *skb,
 	if (!ctx)
 		return NETDEV_TX_BUSY;
 
-#if LINUX_VERSION_CODE <= KERNEL_VERSION(5,12,0)
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(5, 12, 0)
 	can_put_echo_skb(skb, priv->netdev, ctx->ndx);
 #else
 	can_put_echo_skb(skb, priv->netdev, ctx->ndx, 0);
@@ -369,7 +369,7 @@ static netdev_tx_t udt1cri_usb_start_xmit(struct sk_buff *skb,
 	return NETDEV_TX_OK;
 
 xmit_failed:
-#if LINUX_VERSION_CODE <= KERNEL_VERSION(5,12,0)
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(5, 12, 0)
 	can_free_echo_skb(priv->netdev, ctx->ndx);
 #else
 	can_free_echo_skb(priv->netdev, ctx->ndx, NULL);
@@ -383,7 +383,7 @@ xmit_failed:
 
 /* Send cmd to device */
 static void udt1cri_usb_xmit_cmd(struct udt1cri_priv *priv,
-			      struct udt1cri_usb_msg *usb_msg)
+				 struct udt1cri_usb_msg *usb_msg)
 {
 	struct udt1cri_usb_ctx *ctx = NULL;
 	int err;
@@ -403,7 +403,8 @@ static void udt1cri_usb_xmit_cmd(struct udt1cri_priv *priv,
 			   usb_msg->cmd_id);
 }
 
-static void udt1cri_usb_xmit_change_bitrate(struct udt1cri_priv *priv, u16 bitrate)
+static void udt1cri_usb_xmit_change_bitrate(struct udt1cri_priv *priv,
+					    u16 bitrate)
 {
 	struct udt1cri_usb_msg_change_bitrate usb_msg = {
 		.cmd_id = UDT1CRI_CMD_CHANGE_BIT_RATE
@@ -417,15 +418,14 @@ static void udt1cri_usb_xmit_change_bitrate(struct udt1cri_priv *priv, u16 bitra
 static void udt1cri_usb_xmit_read_fw_ver(struct udt1cri_priv *priv, u8 pic)
 {
 	struct udt1cri_usb_msg_fw_ver usb_msg = {
-		.cmd_id = UDT1CRI_CMD_READ_FW_VERSION,
-		.pic = pic
+		.cmd_id = UDT1CRI_CMD_READ_FW_VERSION, .pic = pic
 	};
 
 	udt1cri_usb_xmit_cmd(priv, (struct udt1cri_usb_msg *)&usb_msg);
 }
 
 static void udt1cri_usb_process_can(struct udt1cri_priv *priv,
-				 struct udt1cri_usb_msg_can *msg)
+				    struct udt1cri_usb_msg_can *msg)
 {
 	struct can_frame *cf;
 	struct sk_buff *skb;
@@ -453,7 +453,7 @@ static void udt1cri_usb_process_can(struct udt1cri_priv *priv,
 }
 
 static void udt1cri_usb_process_ka_usb(struct udt1cri_priv *priv,
-				    struct udt1cri_usb_msg_ka_usb *msg)
+				       struct udt1cri_usb_msg_ka_usb *msg)
 {
 	if (unlikely(priv->usb_ka_first_pass)) {
 		netdev_info(priv->netdev, "PIC USB version %hhu.%hhu\n",
@@ -479,7 +479,7 @@ static u32 convert_can2host_bitrate(struct udt1cri_usb_msg_ka_can *msg)
 }
 
 static void udt1cri_usb_process_ka_can(struct udt1cri_priv *priv,
-				    struct udt1cri_usb_msg_ka_can *msg)
+				       struct udt1cri_usb_msg_ka_can *msg)
 {
 	if (unlikely(priv->can_ka_first_pass)) {
 		netdev_info(priv->netdev, "PIC CAN version %hhu.%hhu\n",
@@ -495,9 +495,9 @@ static void udt1cri_usb_process_ka_can(struct udt1cri_priv *priv,
 
 		if (bitrate != priv->can.bittiming.bitrate)
 			netdev_err(
-			    priv->netdev,
-			    "Wrong bitrate reported by the device (%u). Expected %u",
-			    bitrate, priv->can.bittiming.bitrate);
+				priv->netdev,
+				"Wrong bitrate reported by the device (%u). Expected %u",
+				bitrate, priv->can.bittiming.bitrate);
 	}
 
 	priv->bec.txerr = msg->tx_err_cnt;
@@ -516,21 +516,22 @@ static void udt1cri_usb_process_ka_can(struct udt1cri_priv *priv,
 }
 
 static void udt1cri_usb_process_rx(struct udt1cri_priv *priv,
-				struct udt1cri_usb_msg *msg)
+				   struct udt1cri_usb_msg *msg)
 {
 	switch (msg->cmd_id) {
 	case UDT1CRI_CMD_I_AM_ALIVE_FROM_CAN:
-		udt1cri_usb_process_ka_can(priv,
-					(struct udt1cri_usb_msg_ka_can *)msg);
+		udt1cri_usb_process_ka_can(
+			priv, (struct udt1cri_usb_msg_ka_can *)msg);
 		break;
 
 	case UDT1CRI_CMD_I_AM_ALIVE_FROM_USB:
-		udt1cri_usb_process_ka_usb(priv,
-					(struct udt1cri_usb_msg_ka_usb *)msg);
+		udt1cri_usb_process_ka_usb(
+			priv, (struct udt1cri_usb_msg_ka_usb *)msg);
 		break;
 
 	case UDT1CRI_CMD_RECEIVE_MESSAGE:
-		udt1cri_usb_process_can(priv, (struct udt1cri_usb_msg_can *)msg);
+		udt1cri_usb_process_can(priv,
+					(struct udt1cri_usb_msg_can *)msg);
 		break;
 
 	case UDT1CRI_CMD_NOTHING_TO_SEND:
@@ -641,7 +642,8 @@ static int udt1cri_usb_start(struct udt1cri_priv *priv)
 		}
 
 		usb_fill_bulk_urb(urb, priv->udev,
-				  usb_rcvbulkpipe(priv->udev, UDT1CRI_USB_EP_IN),
+				  usb_rcvbulkpipe(priv->udev,
+						  UDT1CRI_USB_EP_IN),
 				  buf, UDT1CRI_USB_RX_BUFF_SIZE,
 				  udt1cri_usb_read_bulk_callback, priv);
 		urb->transfer_flags |= URB_NO_TRANSFER_DMA_MAP;
@@ -729,7 +731,7 @@ static int udt1cri_net_set_mode(struct net_device *netdev, enum can_mode mode)
 }
 
 static int udt1cri_net_get_berr_counter(const struct net_device *netdev,
-				     struct can_berr_counter *bec)
+					struct can_berr_counter *bec)
 {
 	struct udt1cri_priv *priv = netdev_priv(netdev);
 
@@ -777,7 +779,7 @@ static int udt1cri_set_termination(struct net_device *netdev, u16 term)
 }
 
 static int udt1cri_usb_probe(struct usb_interface *intf,
-			  const struct usb_device_id *id)
+			     const struct usb_device_id *id)
 {
 	struct net_device *netdev;
 	struct udt1cri_priv *priv;

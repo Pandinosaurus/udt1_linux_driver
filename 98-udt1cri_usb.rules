@@ -1,3 +1,5 @@
-ATTR{product}=="UDT1CR-I", ATTR{idVendor}=="04d8", SYMLINK+="can0"
+ATTR{product}=="UDT1CR-I", ATTR{idVendor}=="04d8", SYMLINK+="can%n"
 ACTION=="add", ATTR{product}=="UDT1CR-I", ATTR{idVendor}=="04d8", RUN+="/usr/src/udt1_linux_driver-0.1/udt1cri.sh"
-ACTION=="remove", ATTR{product}=="UDT1CR-I", ATTR{idVendor}=="04d8", PROGRAM="/usr/sbin/modprobe -r udt1cri_usb"
+
+ATTR{product}=="UDT1FR-I", ATTR{idVendor}=="04d8", SYMLINK+="can%n"
+ACTION=="add", ATTR{product}=="UDT1FR-I", ATTR{idVendor}=="04d8", RUN+="/usr/src/udt1_linux_driver-0.1/udt1cri.sh"

@@ -24,7 +24,7 @@ run:
 	$(MAKE) modules_install
 	sudo modprobe $(NAME_MODULE)
 
-run_auto:dkms udev_install
+run_auto: dkms udev_install
 
 dkms:
 	mkdir -p /usr/src/udt1_linux_driver-$(PACKAGE_VERSION)
@@ -34,7 +34,7 @@ dkms:
 	sudo dkms install udt1_linux_driver -v $(PACKAGE_VERSION)
 	
 remove_all:
-	sudo dkms remove  udt1_linux_driver/0.1 --all
+	sudo dkms remove udt1_linux_driver/0.1 --all || true
 	rm -rf /usr/src/udt1_linux_driver-$(PACKAGE_VERSION)
 	rm -f /lib/udev/rules.d/98-$(NAME_MODULE).rules
 

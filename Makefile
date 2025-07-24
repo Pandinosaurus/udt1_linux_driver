@@ -44,8 +44,3 @@ udev_install:
 	cp 98-$(NAME_MODULE).rules /lib/udev/rules.d
 	chmod	+x /usr/src/udt1_linux_driver-$(PACKAGE_VERSION)/udt1cri.sh
 	udevadm control --reload 
-	
-test:
-	g++ -lgtest_main -lgtest -lpthread ./tests/mcba_tests.cpp -o ./tests/mcba_tests
-	./tests/mcba_tests --gtest_break_on_failure
-

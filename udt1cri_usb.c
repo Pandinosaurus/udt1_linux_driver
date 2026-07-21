@@ -18,7 +18,13 @@
  * and net/can/usb/mcba_usb.c
  */
 
+#include <linux/version.h>
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 12, 0)
 #include <asm/unaligned.h>
+#else
+#include <linux/unaligned.h>
+#endif
+
 #include <linux/can.h>
 #include <linux/can/dev.h>
 #include <linux/can/error.h>
